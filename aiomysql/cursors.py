@@ -25,7 +25,7 @@ RE_INSERT_VALUES = re.compile(
 
 
 async def check_released(conn, query):
-    await asyncio.sleep(5)
+    await asyncio.sleep(300)
     if not conn.closed:
         logger.warning('The connection was not released after 5 minutes, query: %s' % query)
 
