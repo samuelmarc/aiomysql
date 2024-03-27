@@ -2,6 +2,7 @@ import re
 import json
 import warnings
 import contextlib
+import asyncio
 
 from pymysql.err import (
     Warning, Error, InterfaceError, DataError,
@@ -21,6 +22,12 @@ RE_INSERT_VALUES = re.compile(
     r"(\(\s*(?:%s|%\(.+\)s)\s*(?:,\s*(?:%s|%\(.+\)s)\s*)*\))" +
     r"(\s*(?:ON DUPLICATE.*)?);?\s*\Z",
     re.IGNORECASE | re.DOTALL)
+
+
+async def check_released(conn, query):
+    await asyncio.sleep(5)
+    if not conn.closed:
+        logger.warning('The connection was not released after 5 minutes, query: %s' % query)
 
 
 class Cursor:
@@ -241,6 +248,7 @@ class Cursor:
         if self._echo:
             logger.info(query)
             logger.info("%r", args)
+        asyncio.create_task(check_released(conn, query))
         return self._rowcount
 
     async def executemany(self, query, args):
